@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskPilot AI — Intelligent Task & Productivity Pilot</title>
+  <meta name="description" content="TaskPilot AI is an intelligent productivity cockpit featuring AI goal deconstruction, Kanban boards, Eisenhower matrix, and Pomodoro focus timers.">
+  <link rel="stylesheet" href="styles/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
+</head>
+<body data-theme="dark">
+
+  <!-- Ambient Glowing Background Mesh -->
+  <div class="ambient-background" aria-hidden="true">
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+  </div>
+
+  <!-- Confetti Canvas for Celebrations -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Main Application Container -->
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="main-sidebar">
+      <!-- Brand Logo & Header -->
+      <div class="brand-section">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <h1>TaskPilot <span class="ai-badge">AI</span></h1>
+          <p>Productivity Cockpit</p>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="nav-group-label">Workspaces</div>
+      <ul class="nav-links">
+        <li class="nav-item active" data-view-target="kanban" id="nav-kanban">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="3" y="3" width="7" height="18" rx="1"></rect>
+            <rect x="14" y="3" width="7" height="11" rx="1"></rect>
+          </svg>
+          <span>AI Task Dashboard</span>
+          <span class="count-badge" id="sidebar-total-badge">6</span>
+        </li>
+        <li class="nav-item" data-view-target="workflow" id="nav-workflow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+            <path d="M10 6.5h4M17.5 10v4M6.5 10v7a1.5 1.5 0 0 0 1.5 1.5H14"></path>
+          </svg>
+          <span>AI Workflow Generator</span>
+        </li>
+        <li class="nav-item" data-view-target="matrix" id="nav-matrix">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="12" y1="3" x2="12" y2="21"></line>
+          </svg>
+          <span>Eisenhower Matrix</span>
+          <span class="count-badge" id="sidebar-matrix-badge">0</span>
+        </li>
+        <li class="nav-item" data-view-target="focus" id="nav-focus">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Pomodoro Focus</span>
+        </li>
+        <li class="nav-item" data-view-target="tasks-list" id="nav-list">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+          <span>Table List View</span>
+        </li>
+        <li class="nav-item" data-view-target="analytics" id="nav-analytics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Analytics & Velocity</span>
+        </li>
+      </ul>
+
+      <!-- Projects Section -->
+      <div class="nav-group-label" style="margin-top: 20px;">Projects</div>
+      <div class="projects-section">
+        <div class="project-tag-btn active" data-project-filter="all">
+          <span class="project-dot" style="background: var(--text-muted);"></span>
+          <span>All Projects</span>
+        </div>
+        <div class="project-tag-btn" data-project-filter="proj-ai">
+          <span class="project-dot" style="background: #6366f1;"></span>
+          <span>AI Engineering</span>
+        </div>
+        <div class="project-tag-btn" data-project-filter="proj-launch">
+          <span class="project-dot" style="background: #ec4899;"></span>
+          <span>Product Launch</span>
+        </div>
+        <div class="project-tag-btn" data-project-filter="proj-academic">
+          <span class="project-dot" style="background: #06b6d4;"></span>
+          <span>Academic Research</span>
+        </div>
+        <div class="project-tag-btn" data-project-filter="proj-personal">
+          <span class="project-dot" style="background: #10b981;"></span>
+          <span>Personal Growth</span>
+        </div>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="ai-copilot-pill" id="open-ai-copilot-btn">
+          <div class="ai-pill-text">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+            </svg>
+            <span>AI Copilot</span>
+          </div>
+          <div class="pulse-indicator" title="AI Assistant Online"></div>
+        </div>
+
+        <div style="display: flex; gap: 6px; justify-content: space-between;">
+          <button class="btn btn-ghost" id="export-json-btn" title="Backup all data to JSON" style="font-size:0.75rem; padding:6px 10px;">
+            Export JSON
+          </button>
+          <button class="btn btn-ghost" id="export-md-btn" title="Generate Markdown report" style="font-size:0.75rem; padding:6px 10px;">
+            Report (.md)
+          </button>
+          <button class="btn btn-ghost" id="reset-data-btn" title="Reset sample tasks" style="font-size:0.75rem; padding:6px 10px; color:var(--priority-urgent)">
+            Reset
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Layout -->
+    <main class="main-layout">
+      <!-- Top Navigation & Global Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="mobile-menu-toggle" aria-label="Toggle Navigation Menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+
+          <!-- Search Box -->
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" class="search-input" id="global-search" placeholder="Search tasks, descriptions, or tags...">
+          </div>
+        </div>
+
+        <!-- Natural Language Quick-Add Bar -->
+        <div class="quick-add-bar-wrap">
+          <input type="text" class="quick-add-input" id="quick-add-input" placeholder="✨ Type naturally: 'Submit report tomorrow 4pm urgent'...">
+          <button class="btn btn-secondary btn-sm" id="quick-add-btn">
+            Quick Add
+          </button>
+        </div>
+
+        <!-- Header Action Controls -->
+        <div class="header-actions">
+          <button class="btn btn-icon-only" id="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </button>
+
+          <button class="btn btn-primary" id="new-task-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>New Task</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Viewport Display Container -->
+      <div class="view-viewport">
+
+        <!-- ================================================================
+             VIEW 1: Kanban Board
+             ================================================================ -->
+        <section class="app-view active-view" id="view-kanban">
+          <div class="view-header">
+            <div class="view-title-wrap">
+              <h2>AI Task Dashboard</h2>
+              <p>Drag and drop tasks between workflow stages</p>
+            </div>
+            <div class="filter-bar">
+              <span class="filter-pill active" data-filter="all">All Priorities</span>
+              <span class="filter-pill" data-filter="urgent">Urgent</span>
+              <span class="filter-pill" data-filter="high">High</span>
+              <span class="filter-pill" data-filter="medium">Medium</span>
+              <span class="filter-pill" data-filter="low">Low</span>
+            </div>
+          </div>
+
+          <div class="kanban-board">
+            <!-- Column 1: To Do -->
+            <div class="kanban-column" data-status="todo" id="col-todo">
+              <div class="column-header">
+                <div class="column-title">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></span>
+                  <span>To Do</span>
+                  <span class="column-badge" id="badge-col-todo">0</span>
+                </div>
+              </div>
+              <div class="column-cards" id="cards-col-todo"></div>
+            </div>
+
+            <!-- Column 2: In Progress -->
+            <div class="kanban-column" data-status="in-progress" id="col-in-progress">
+              <div class="column-header">
+                <div class="column-title">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></span>
+                  <span>In Progress</span>
+                  <span class="column-badge" id="badge-col-in-progress">0</span>
+                </div>
+              </div>
+              <div class="column-cards" id="cards-col-in-progress"></div>
+            </div>
+
+            <!-- Column 3: Review -->
+            <div class="kanban-column" data-status="review" id="col-review">
+              <div class="column-header">
+                <div class="column-title">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #a855f7;"></span>
+                  <span>In Review</span>
+                  <span class="column-badge" id="badge-col-review">0</span>
+                </div>
+              </div>
+              <div class="column-cards" id="cards-col-review"></div>
+            </div>
+
+            <!-- Column 4: Completed -->
+            <div class="kanban-column" data-status="done" id="col-done">
+              <div class="column-header">
+                <div class="column-title">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+                  <span>Completed</span>
+                  <span class="column-badge" id="badge-col-done">0</span>
+                </div>
+              </div>
+              <div class="column-cards" id="cards-col-done"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 2: AI Workflow Generator
+             ================================================================ -->
+        <section class="app-view" id="view-workflow">
+          <div class="view-header">
+            <div class="view-title-wrap">
+              <h2>AI Workflow Generator</h2>
+              <p>Convert human instructions into structured execution phases, dependencies, milestones &amp; actionable workflows</p>
+            </div>
+            <div class="workflow-engine-pill" id="active-engine-badge" title="Click to configure AI Engine &amp; API Keys" style="cursor: pointer;">
+              <span class="status-indicator-dot" id="engine-status-dot"></span>
+              <span id="engine-status-label">Demo Mode (Offline Operations Engine)</span>
+            </div>
+          </div>
+
+          <!-- Workflow Sub-Navigation Tabs -->
+          <div class="workflow-tabs-bar">
+            <button class="workflow-tab-btn active" data-workflow-tab="studio" id="tab-wf-studio">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+              </svg>
+              <span>Workflow Studio</span>
+            </button>
+            <button class="workflow-tab-btn" data-workflow-tab="history" id="tab-wf-history">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 14 14"></polyline>
+              </svg>
+              <span>Saved Workflows</span>
+              <span class="workflow-tab-badge" id="saved-workflows-badge">0</span>
+            </button>
+            <button class="workflow-tab-btn" data-workflow-tab="settings" id="tab-wf-settings">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+              <span>AI Engine &amp; Keys</span>
+            </button>
+          </div>
+
+          <!-- ==================== SUB-PANEL 1: STUDIO ==================== -->
+          <div class="workflow-sub-panel active-sub-panel" id="panel-wf-studio">
+            <!-- Operations Input Card -->
+            <div class="workflow-input-card">
+              <div class="workflow-input-header">
+                <div class="workflow-header-title-wrap">
+                  <div class="workflow-icon-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                      <polyline points="2 17 12 22 22 17"></polyline>
+                      <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main);">Operations Instructions &amp; Goal Statement</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Enter natural human instructions. The generator acts as an operations assistant to build structured workflows.</p>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-secondary btn-sm" id="load-hackathon-demo-btn" type="button" title="Load Hackathon specification demo">
+                    🎓 Hackathon Prompt
+                  </button>
+                  <button class="btn btn-ghost btn-sm" id="clear-workflow-btn" type="button">
+                    Clear Input
+                  </button>
+                </div>
+              </div>
+
+              <!-- Main Natural Language Input -->
+              <div class="workflow-textarea-wrap">
+                <textarea class="form-control workflow-textarea" id="workflow-instructions-input" rows="4" placeholder="Describe what you need to accomplish… e.g. Organize a college hackathon for 100 participants in 10 days. Handle venue booking, registrations, sponsorships, marketing, mentors, equipment, event-day operations, and post-event feedback. We have four organizers and a limited budget."></textarea>
+                <div class="workflow-input-footer-bar">
+                  <div class="workflow-char-counter" id="workflow-char-counter">0 characters (min. 10)</div>
+                  <div class="workflow-validation-msg" id="workflow-validation-msg" style="display: none;"></div>
+                </div>
+              </div>
+
+              <!-- Example Prompt Chips -->
+              <div class="workflow-presets-row">
+                <span class="preset-label">Example Scenarios:</span>
+                <button type="button" class="preset-chip active" data-preset="hackathon">
+                  🎓 College Hackathon (100 hackers, 10d)
+                </button>
+                <button type="button" class="preset-chip" data-preset="product-launch">
+                  🚀 v2.0 Product Release &amp; Canary
+                </button>
+                <button type="button" class="preset-chip" data-preset="incident-response">
+                  🛡️ DevOps Outage Triage
+                </button>
+                <button type="button" class="preset-chip" data-preset="onboarding">
+                  👥 Senior Engineer Onboarding
+                </button>
+                <button type="button" class="preset-chip" data-preset="college-event">
+                  🏛️ Campus Technical Symposium
+                </button>
+              </div>
+
+              <!-- Optional Planning Settings (Collapsible / Flexible) -->
+              <div class="workflow-settings-accordion">
+                <div class="workflow-settings-toggle" id="toggle-optional-settings-btn">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
+                      <line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line>
+                      <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
+                      <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>
+                    </svg>
+                    <span style="font-weight: 600; font-size: 0.85rem;">Optional Planning Settings</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">(Deadline, Team, Budget &amp; Detail Level)</span>
+                  </div>
+                  <span id="optional-settings-arrow" style="font-size: 0.8rem; color: var(--text-muted);">▼ Expand Settings</span>
+                </div>
+
+                <div class="workflow-settings-grid" id="optional-settings-body" style="display: none;">
+                  <div class="setting-field">
+                    <label for="wf-setting-name">Workflow / Project Name</label>
+                    <input type="text" id="wf-setting-name" class="form-control form-control-sm" placeholder="Auto-generated from instruction if empty">
+                  </div>
+                  <div class="setting-field">
+                    <label for="wf-setting-deadline">Overall Deadline</label>
+                    <input type="date" id="wf-setting-deadline" class="form-control form-control-sm">
+                  </div>
+                  <div class="setting-field">
+                    <label for="wf-setting-priority">Baseline Priority</label>
+                    <select id="wf-setting-priority" class="form-control form-control-sm">
+                      <option value="high" selected>High (Balanced distribution)</option>
+                      <option value="urgent">Urgent (Fast-track critical)</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                    </select>
+                  </div>
+                  <div class="setting-field">
+                    <label for="wf-setting-team">Team Size / Members</label>
+                    <input type="text" id="wf-setting-team" class="form-control form-control-sm" placeholder="e.g. 4 organizers">
+                  </div>
+                  <div class="setting-field">
+                    <label for="wf-setting-budget">Budget / Constraints</label>
+                    <input type="text" id="wf-setting-budget" class="form-control form-control-sm" placeholder="e.g. Limited budget / $2,000 cap">
+                  </div>
+                  <div class="setting-field">
+                    <label for="wf-setting-detail">Detail Level</label>
+                    <select id="wf-setting-detail" class="form-control form-control-sm">
+                      <option value="quick">⚡ Quick (5–8 core tasks)</option>
+                      <option value="standard" selected>🎯 Standard (8–15 tasks)</option>
+                      <option value="detailed">📋 Detailed (15–25 tasks)</option>
+                    </select>
+                  </div>
+                  <div class="setting-field">
+                    <label for="workflow-project-select">Target Project</label>
+                    <select id="workflow-project-select" class="form-control form-control-sm"></select>
+                  </div>
+                  <div class="setting-field">
+                    <label for="workflow-horizon-select">Default Horizon (if no date)</label>
+                    <select id="workflow-horizon-select" class="form-control form-control-sm">
+                      <option value="10" selected>10 Days (Sprint)</option>
+                      <option value="7">7 Days (Fast-Track)</option>
+                      <option value="14">14 Days (Standard)</option>
+                      <option value="30">30 Days (Extended)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Bar -->
+              <div class="workflow-controls-bar" style="margin-top: 16px;">
+                <div class="workflow-controls-left">
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">
+                    💡 Works with any human instruction — all optional settings have intelligent defaults.
+                  </span>
+                </div>
+                <div class="workflow-controls-right">
+                  <button type="button" class="btn btn-primary" id="generate-workflow-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    <span>Generate Workflow</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Loading & Progress Steps Indicator -->
+            <div id="workflow-progress-loader" class="workflow-progress-loader" style="display: none;">
+              <div class="loader-spinner-wrap">
+                <div class="loader-pulse-ring"></div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin">
+                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                </svg>
+              </div>
+              <div class="loader-text-wrap">
+                <h4 id="loader-headline" style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">Synthesizing Operational Plan...</h4>
+                <div class="loader-stages-list" id="loader-stages-list">
+                  <div class="loader-stage active" id="stg-1">1. Analyzing objective &amp; constraints...</div>
+                  <div class="loader-stage" id="stg-2">2. Deconstructing into execution phases...</div>
+                  <div class="loader-stage" id="stg-3">3. Generating actionable tasks &amp; criteria...</div>
+                  <div class="loader-stage" id="stg-4">4. Resolving chronological dependencies...</div>
+                  <div class="loader-stage" id="stg-5">5. Synthesizing risk mitigations &amp; milestones...</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Status & Confirmation Banner -->
+            <div id="workflow-status-banner"></div>
+
+            <!-- Generated Results & Interactive Editor Container -->
+            <div id="workflow-results-container" class="workflow-results-container"></div>
+          </div>
+
+          <!-- ==================== SUB-PANEL 2: SAVED WORKFLOWS ==================== -->
+          <div class="workflow-sub-panel" id="panel-wf-history" style="display: none;">
+            <div class="history-header-card">
+              <div class="history-header-left">
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Saved Workflows &amp; Execution History</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Revisit previously generated workflows, track real-time completion progress, and import remaining tasks.</p>
+              </div>
+              <div class="history-filter-bar">
+                <span class="filter-pill active" data-wf-filter="all">All</span>
+                <span class="filter-pill" data-wf-filter="active">Active</span>
+                <span class="filter-pill" data-wf-filter="completed">Completed</span>
+                <span class="filter-pill" data-wf-filter="draft">Drafts</span>
+                <span class="filter-pill" data-wf-filter="archived">Archived</span>
+              </div>
+            </div>
+
+            <div id="saved-workflows-list" class="saved-workflows-grid"></div>
+          </div>
+
+          <!-- ==================== SUB-PANEL 3: AI ENGINE & SETTINGS ==================== -->
+          <div class="workflow-sub-panel" id="panel-wf-settings" style="display: none;">
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <div class="workflow-icon-badge" style="background: linear-gradient(135deg, #06b6d4, #6366f1);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">AI Provider Configuration</h3>
+                  <p style="font-size: 0.8rem; color: var(--text-muted);">Configure an external language model API or use the built-in offline Demo Mode.</p>
+                </div>
+              </div>
+
+              <div class="settings-form-body">
+                <div class="provider-mode-banner" id="current-mode-status-banner">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="status-indicator-dot"></span>
+                    <strong id="mode-banner-title">Demo Mode Active (Offline Heuristic Operations Engine)</strong>
+                  </div>
+                  <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 6px;">
+                    TaskPilot AI runs autonomously offline using a deterministic operations planning model. No external API key is required.
+                  </p>
+                </div>
+
+                <div class="form-group" style="margin-top: 18px;">
+                  <label class="form-label" for="setting-ai-provider">AI Provider</label>
+                  <select id="setting-ai-provider" class="form-control">
+                    <option value="demo" selected>Demo Mode (Offline Deterministic Engine - 100% Free &amp; Offline)</option>
+                    <option value="gemini">Google Gemini API (Gemini 1.5 Flash / Pro)</option>
+                    <option value="openai">OpenAI API (GPT-4o / GPT-4o-mini)</option>
+                    <option value="custom">Custom Compatible Endpoint</option>
+                  </select>
+                </div>
+
+                <div id="api-key-config-group" style="display: none;">
+                  <div class="form-group">
+                    <label class="form-label" for="setting-api-key">API Key</label>
+                    <div style="display: flex; gap: 8px;">
+                      <input type="password" id="setting-api-key" class="form-control" placeholder="Enter your secret API key (kept locally in browser only)">
+                      <button type="button" class="btn btn-secondary btn-sm" id="toggle-key-visibility-btn">Show</button>
+                    </div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; display: block;">
+                      Security note: API keys are stored only in your local browser storage and never logged or shared.
+                    </span>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="setting-ai-model">Model Name</label>
+                    <input type="text" id="setting-ai-model" class="form-control" value="gemini-1.5-flash" placeholder="e.g. gemini-1.5-flash or gpt-4o-mini">
+                  </div>
+
+                  <div class="form-group" id="custom-endpoint-group" style="display: none;">
+                    <label class="form-label" for="setting-custom-endpoint">Custom Endpoint URL</label>
+                    <input type="text" id="setting-custom-endpoint" class="form-control" placeholder="https://api.your-endpoint.com/v1/chat/completions">
+                  </div>
+
+                  <div style="display: flex; gap: 10px; margin-top: 12px;">
+                    <button type="button" class="btn btn-secondary" id="test-ai-connection-btn">
+                      Test Connection
+                    </button>
+                    <span id="test-connection-result" style="font-size: 0.82rem; align-self: center;"></span>
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+                  <button type="button" class="btn btn-ghost" id="reset-ai-config-btn">Reset to Demo Mode</button>
+                  <button type="button" class="btn btn-primary" id="save-ai-config-btn">Save Configuration</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Supabase Cloud Persistence Settings Card -->
+            <div class="settings-card" style="margin-top: 24px;">
+              <div class="settings-card-header">
+                <div class="workflow-icon-badge" style="background: linear-gradient(135deg, #10b981, #06b6d4);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Supabase Cloud Persistence (Optional)</h3>
+                  <p style="font-size: 0.8rem; color: var(--text-muted);">Sync tasks and workflows across devices via your free Supabase database. Uses environment variables when running locally.</p>
+                </div>
+              </div>
+
+              <div class="settings-form-body">
+                <div class="provider-mode-banner" id="supabase-mode-status-banner">
+                  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <span class="status-indicator-dot" id="supabase-status-dot"></span>
+                      <strong id="supabase-status-title">LocalStorage Active (Zero Setup Required)</strong>
+                    </div>
+                    <span id="supabase-last-sync-tag" style="font-size: 0.75rem; color: var(--text-muted);"></span>
+                  </div>
+                  <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 6px;">
+                    All workflows, kanban cards, and timers are saved instantly in your local browser storage. Connecting to Supabase adds multi-device backup and real-time cloud collaboration.
+                  </p>
+                </div>
+
+                <div class="form-group" style="margin-top: 18px;">
+                  <label class="form-label" for="setting-supabase-url">Supabase Project URL</label>
+                  <input type="text" id="setting-supabase-url" class="form-control" placeholder="https://your-project-id.supabase.co">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="setting-supabase-anon-key">Supabase Public Anon Key</label>
+                  <div style="display: flex; gap: 8px;">
+                    <input type="password" id="setting-supabase-anon-key" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                    <button type="button" class="btn btn-secondary btn-sm" id="toggle-supabase-key-btn">Show</button>
+                  </div>
+                  <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; display: block;">
+                    🔒 Security note: Only enter your client anon public key. Never share your secret service_role key.
+                  </span>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
+                  <button type="button" class="btn btn-secondary" id="test-supabase-connection-btn">
+                    Test Connection
+                  </button>
+                  <button type="button" class="btn btn-secondary" id="sync-supabase-now-btn">
+                    Sync to Cloud Now
+                  </button>
+                  <span id="test-supabase-result" style="font-size: 0.82rem; align-self: center;"></span>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+                  <button type="button" class="btn btn-ghost" id="clear-supabase-config-btn">Disconnect / Local Only</button>
+                  <button type="button" class="btn btn-primary" id="save-supabase-config-btn">Save Cloud Config</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Optional Collapsible Eisenhower Matrix (Preserved for full triage compatibility) -->
+          <div class="matrix-accordion-wrap">
+            <div class="matrix-accordion-header" id="toggle-matrix-triage-btn">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="12" y1="3" x2="12" y2="21"></line>
+                </svg>
+                <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">Eisenhower Priority Triage (Secondary View)</span>
+              </div>
+              <span id="matrix-accordion-arrow" style="font-size: 0.8rem; color: var(--text-muted); transition: transform 0.2s;">▼ Show Matrix</span>
+            </div>
+            <div class="matrix-accordion-body" id="matrix-accordion-body" style="display: none; margin-top: 16px;">
+              <div class="matrix-grid">
+                <div class="matrix-quadrant q1">
+                  <div class="quadrant-header">
+                    <div class="quadrant-badge-title">
+                      <span class="quadrant-tag">Q1: Do First</span>
+                      <span style="font-weight: 600; font-size: 0.9rem;">Urgent &amp; Important</span>
+                    </div>
+                  </div>
+                  <div class="matrix-tasks-list" id="matrix-q1-list"></div>
+                </div>
+                <div class="matrix-quadrant q2">
+                  <div class="quadrant-header">
+                    <div class="quadrant-badge-title">
+                      <span class="quadrant-tag">Q2: Schedule</span>
+                      <span style="font-weight: 600; font-size: 0.9rem;">Important, Not Urgent</span>
+                    </div>
+                  </div>
+                  <div class="matrix-tasks-list" id="matrix-q2-list"></div>
+                </div>
+                <div class="matrix-quadrant q3">
+                  <div class="quadrant-header">
+                    <div class="quadrant-badge-title">
+                      <span class="quadrant-tag">Q3: Delegate</span>
+                      <span style="font-weight: 600; font-size: 0.9rem;">Urgent, Not Important</span>
+                    </div>
+                  </div>
+                  <div class="matrix-tasks-list" id="matrix-q3-list"></div>
+                </div>
+                <div class="matrix-quadrant q4">
+                  <div class="quadrant-header">
+                    <div class="quadrant-badge-title">
+                      <span class="quadrant-tag">Q4: Eliminate</span>
+                      <span style="font-weight: 600; font-size: 0.9rem;">Neither</span>
+                    </div>
+                  </div>
+                  <div class="matrix-tasks-list" id="matrix-q4-list"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW: Dedicated Eisenhower Priority Matrix
+             ================================================================ -->
+        <section class="app-view" id="view-matrix">
+          <div class="view-header">
+            <div class="view-title-wrap">
+              <h2>Eisenhower Priority Matrix</h2>
+              <p>Decision triage framework: Categorize by Urgency and Importance to maximize velocity</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <div class="filter-bar" style="margin-bottom: 0;">
+                <span class="filter-pill active" data-matrix-filter="all">All Quadrants</span>
+                <span class="filter-pill" data-matrix-filter="q1">Q1: Do First</span>
+                <span class="filter-pill" data-matrix-filter="q2">Q2: Schedule</span>
+                <span class="filter-pill" data-matrix-filter="q3">Q3: Delegate</span>
+                <span class="filter-pill" data-matrix-filter="q4">Q4: Eliminate</span>
+              </div>
+              <button class="btn btn-primary btn-sm" id="matrix-add-task-btn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Add Task</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="matrix-grid full-page-matrix">
+            <!-- Q1: Do First (Urgent & Important) -->
+            <div class="matrix-quadrant q1" data-quadrant="q1" id="quadrant-card-q1">
+              <div class="quadrant-header">
+                <div class="quadrant-badge-title">
+                  <span class="quadrant-tag q1-tag">Q1: Do First</span>
+                  <span style="font-weight: 600; font-size: 0.88rem; color: var(--text-main);">Urgent &amp; Important</span>
+                </div>
+                <span class="column-badge" id="badge-matrix-q1">0</span>
+              </div>
+              <p class="quadrant-guidance">Crises, pressing deadlines, and critical path blockers. Execute immediately.</p>
+              <div class="matrix-tasks-list" id="full-matrix-q1-list"></div>
+              <button class="btn btn-ghost btn-xs quadrant-quick-add-btn" data-quadrant="q1">+ Add Task to Q1</button>
+            </div>
+
+            <!-- Q2: Schedule (Important, Not Urgent) -->
+            <div class="matrix-quadrant q2" data-quadrant="q2" id="quadrant-card-q2">
+              <div class="quadrant-header">
+                <div class="quadrant-badge-title">
+                  <span class="quadrant-tag q2-tag">Q2: Schedule</span>
+                  <span style="font-weight: 600; font-size: 0.88rem; color: var(--text-main);">Important, Not Urgent</span>
+                </div>
+                <span class="column-badge" id="badge-matrix-q2">0</span>
+              </div>
+              <p class="quadrant-guidance">Strategic planning, deep work, system building, self-development. Schedule time.</p>
+              <div class="matrix-tasks-list" id="full-matrix-q2-list"></div>
+              <button class="btn btn-ghost btn-xs quadrant-quick-add-btn" data-quadrant="q2">+ Add Task to Q2</button>
+            </div>
+
+            <!-- Q3: Delegate (Urgent, Not Important) -->
+            <div class="matrix-quadrant q3" data-quadrant="q3" id="quadrant-card-q3">
+              <div class="quadrant-header">
+                <div class="quadrant-badge-title">
+                  <span class="quadrant-tag q3-tag">Q3: Delegate</span>
+                  <span style="font-weight: 600; font-size: 0.88rem; color: var(--text-main);">Urgent, Not Important</span>
+                </div>
+                <span class="column-badge" id="badge-matrix-q3">0</span>
+              </div>
+              <p class="quadrant-guidance">Routine logistics, interruptions, low-leverage requests. Automate or delegate.</p>
+              <div class="matrix-tasks-list" id="full-matrix-q3-list"></div>
+              <button class="btn btn-ghost btn-xs quadrant-quick-add-btn" data-quadrant="q3">+ Add Task to Q3</button>
+            </div>
+
+            <!-- Q4: Eliminate (Neither) -->
+            <div class="matrix-quadrant q4" data-quadrant="q4" id="quadrant-card-q4">
+              <div class="quadrant-header">
+                <div class="quadrant-badge-title">
+                  <span class="quadrant-tag q4-tag">Q4: Eliminate</span>
+                  <span style="font-weight: 600; font-size: 0.88rem; color: var(--text-main);">Neither Urgent nor Important</span>
+                </div>
+                <span class="column-badge" id="badge-matrix-q4">0</span>
+              </div>
+              <p class="quadrant-guidance">Time-wasters, excessive busywork, distractions. Eliminate or defer.</p>
+              <div class="matrix-tasks-list" id="full-matrix-q4-list"></div>
+              <button class="btn btn-ghost btn-xs quadrant-quick-add-btn" data-quadrant="q4">+ Add Task to Q4</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 3: Pomodoro Focus Companion
+             ================================================================ -->
+        <section class="app-view" id="view-focus">
+          <div class="view-header">
+            <div class="view-title-wrap">
+              <h2>Focus Companion</h2>
+              <p>Zero-distraction deep work timer with ambient focus synthesizer</p>
+            </div>
+          </div>
+
+          <div class="focus-container">
+            <div class="timer-card">
+              <div class="timer-modes">
+                <button class="timer-mode-btn active" data-timer-mode="focus">Deep Focus (25m)</button>
+                <button class="timer-mode-btn" data-timer-mode="shortBreak">Short Break (5m)</button>
+                <button class="timer-mode-btn" data-timer-mode="longBreak">Long Break (15m)</button>
+              </div>
+
+              <div class="timer-display" id="timer-display">25:00</div>
+
+              <div>
+                <div class="timer-active-task-bar">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 14 10"></polyline>
+                  </svg>
+                  <span>Active Session:</span>
+                  <strong id="timer-task-name" style="color: var(--text-main);">General Deep Focus</strong>
+                </div>
+              </div>
+
+              <div class="timer-controls">
+                <button class="btn btn-primary btn-timer-primary" id="timer-start-btn">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  Start Focus
+                </button>
+                <button class="btn btn-secondary" id="timer-reset-btn" style="padding: 14px 24px; border-radius: var(--radius-full);">
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <!-- Ambient Sound Generator -->
+            <div class="ambient-sound-card">
+              <div class="ambient-left">
+                <div class="sound-icon-box">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h4 style="font-weight: 700; color: var(--text-main);">Procedural Focus Audio</h4>
+                  <p style="font-size: 0.8rem; color: var(--text-muted);">Synthesized in real-time with Web Audio API (Offline & lightweight)</p>
+                </div>
+              </div>
+
+              <div class="sound-buttons">
+                <button class="sound-btn" id="ambient-rain-btn">🌧️ Gentle Rain</button>
+                <button class="sound-btn" id="ambient-binaural-btn">🧠 6Hz Theta Drone</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 4: Table List View
+             ================================================================ -->
+        <section class="app-view" id="view-tasks-list">
+          <div class="view-header">
+            <div class="view-title-wrap">
+              <h2>All Tasks Table</h2>
+              <p>Comprehensive tabular overview of your workflow</p>
+            </div>
+          </div>
+
+          <div style="background: var(--bg-glass-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+              <thead style="background: var(--bg-tertiary); border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                <tr>
+                  <th style="padding: 14px 16px;">Task Title</th>
+                  <th style="padding: 14px 16px;">Project</th>
+                  <th style="padding: 14px 16px;">Priority</th>
+                  <th style="padding: 14px 16px;">Status</th>
+                  <th style="padding: 14px 16px;">Due Date</th>
+                  <th style="padding: 14px 16px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tasks-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 5: Analytics & Productivity Dashboard
+             ================================================================ -->
+        <section class="app-view" id="view-analytics">
+          <div class="view-header">
+            <div class="view-title-wrap">
+              <h2>Productivity Analytics</h2>
+              <p>Velocity metrics, priority load, and project distribution</p>
+            </div>
+          </div>
+
+          <!-- KPI Cards -->
+          <div class="analytics-grid">
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Total Tasks</span>
+                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg>
+                </div>
+              </div>
+              <div class="stat-value" id="kpi-total-tasks">0</div>
+              <div class="stat-meta">Across 4 active projects</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Completion Rate</span>
+                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <div class="stat-value" id="kpi-completion-rate">0%</div>
+              <div class="stat-meta">🎯 Velocity trending positive</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Urgent Backlog</span>
+                <div class="stat-icon" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                </div>
+              </div>
+              <div class="stat-value" id="kpi-urgent-count" style="color: var(--priority-urgent);">0</div>
+              <div class="stat-meta" style="color: var(--text-muted)">Requires immediate action</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Focus Time Logged</span>
+                <div class="stat-icon" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
+              </div>
+              <div class="stat-value" id="kpi-focus-hours">0h</div>
+              <div class="stat-meta">Via Pomodoro sessions</div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="charts-row">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">Weekly Throughput Velocity</h3>
+                <span style="font-size: 0.8rem; color: var(--text-muted)">Tasks completed per day</span>
+              </div>
+              <div class="bar-chart-visual" id="velocity-chart"></div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">Priority Load Breakdown</h3>
+              </div>
+              <div id="priority-breakdown"></div>
+
+              <div class="chart-header" style="margin-top: 24px;">
+                <h3 class="chart-title">Project Distribution</h3>
+              </div>
+              <div id="project-breakdown"></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ======================================================================
+       MODAL: AI Copilot Goal Deconstruction
+       ====================================================================== -->
+  <div class="ai-modal-overlay" id="ai-copilot-modal">
+    <div class="ai-copilot-window">
+      <div class="ai-window-header">
+        <div class="ai-header-brand">
+          <div class="brand-icon" style="width:34px; height:34px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+          </div>
+          <div>
+            <h3>TaskPilot AI Copilot</h3>
+            <p style="font-size:0.75rem; color:var(--text-muted)">Autonomous Goal Deconstruction & Productivity Standup</p>
+          </div>
+        </div>
+        <button class="modal-close-btn btn-icon-only" aria-label="Close Modal">✕</button>
+      </div>
+
+      <div class="ai-prompt-area">
+        <!-- Daily briefing banner -->
+        <div id="ai-briefing-banner"></div>
+
+        <label style="font-size:0.82rem; font-weight:600; color:var(--text-secondary);">
+          Enter a high-level goal or milestone to decompose into actionable tasks:
+        </label>
+        <textarea class="ai-textarea" id="ai-goal-input" placeholder="e.g. 'Build an AI image classifier model', 'Prepare for final examinations', 'Launch new SaaS landing page'..."></textarea>
+        
+        <div class="ai-quick-prompts">
+          <span style="font-size:0.75rem; color:var(--text-muted); align-self:center;">Try:</span>
+          <span class="prompt-chip">Train Machine Learning Model</span>
+          <span class="prompt-chip">Semester Exam Preparation</span>
+          <span class="prompt-chip">Full-Stack Web App Sprint</span>
+          <span class="prompt-chip">Product Launch Campaign</span>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+          <button class="btn btn-primary" id="ai-breakdown-submit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+            </svg>
+            Deconstruct Goal
+          </button>
+        </div>
+      </div>
+
+      <div class="ai-results-pane" id="ai-results-container"></div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL: Create / Edit Task
+       ====================================================================== -->
+  <div class="modal-overlay" id="task-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-task-title">Create New Task</h3>
+        <button class="modal-close-btn btn-icon-only" aria-label="Close Modal">✕</button>
+      </div>
+      <form id="task-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="task-title-input">Task Title *</label>
+            <input type="text" class="form-control" id="task-title-input" required placeholder="e.g. Implement user authentication flow">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="task-desc-input">Description</label>
+            <textarea class="form-control" id="task-desc-input" rows="3" placeholder="Provide extra context, requirements or links..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="task-project-select">Project</label>
+              <select class="form-control" id="task-project-select"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="task-priority-select">Priority</label>
+              <select class="form-control" id="task-priority-select">
+                <option value="urgent">Urgent (P1)</option>
+                <option value="high">High (P2)</option>
+                <option value="medium" selected>Medium (P3)</option>
+                <option value="low">Low (P4)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="task-status-select">Status</label>
+              <select class="form-control" id="task-status-select">
+                <option value="todo" selected>To Do</option>
+                <option value="in-progress">In Progress</option>
+                <option value="review">In Review</option>
+                <option value="done">Completed</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="task-quadrant-select">Eisenhower Quadrant</label>
+              <select class="form-control" id="task-quadrant-select">
+                <option value="q1">Q1: Do First (Urgent & Important)</option>
+                <option value="q2" selected>Q2: Schedule (Important)</option>
+                <option value="q3">Q3: Delegate (Urgent, Not Important)</option>
+                <option value="q4">Q4: Eliminate (Neither)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="task-due-input">Due Date</label>
+              <input type="date" class="form-control" id="task-due-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="task-mins-input">Estimated Time (Mins)</label>
+              <input type="number" class="form-control" id="task-mins-input" value="30" min="5" step="5">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost modal-close-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="save-task-submit">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL: Edit Workflow Task (Workflow Studio)
+       ====================================================================== -->
+  <div class="modal-overlay" id="wf-task-edit-modal">
+    <div class="modal-card" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 id="wf-task-modal-title">Edit Workflow Task</h3>
+        <button class="modal-close-btn btn-icon-only" aria-label="Close Modal">✕</button>
+      </div>
+      <form id="wf-task-edit-form">
+        <input type="hidden" id="wf-edit-task-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="wf-edit-task-title">Task Title *</label>
+            <input type="text" class="form-control" id="wf-edit-task-title" required placeholder="e.g. Secure auditorium venue">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="wf-edit-task-desc">Description</label>
+            <textarea class="form-control" id="wf-edit-task-desc" rows="2" placeholder="Specific action items and context..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="wf-edit-task-phase">Execution Phase</label>
+              <input type="text" class="form-control" id="wf-edit-task-phase" list="wf-phases-datalist" placeholder="e.g. Phase 1: Planning">
+              <datalist id="wf-phases-datalist"></datalist>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wf-edit-task-priority">Priority</label>
+              <select class="form-control" id="wf-edit-task-priority">
+                <option value="urgent">Urgent (P1)</option>
+                <option value="high">High (P2)</option>
+                <option value="medium">Medium (P3)</option>
+                <option value="low">Low (P4)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="wf-edit-task-due">Target Due Date</label>
+              <input type="date" class="form-control" id="wf-edit-task-due">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wf-edit-task-duration">Estimated Duration</label>
+              <input type="text" class="form-control" id="wf-edit-task-duration" value="90 mins" placeholder="e.g. 90 mins or 2 hours">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="wf-edit-task-role">Suggested Role / Owner</label>
+              <input type="text" class="form-control" id="wf-edit-task-role" placeholder="e.g. Organizer 1 (Lead Operations)">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wf-edit-task-criteria">Completion Criteria</label>
+              <input type="text" class="form-control" id="wf-edit-task-criteria" placeholder="e.g. Signed contract / verified receipt">
+            </div>
+          </div>
+
+          <!-- Dependencies Multi-Select -->
+          <div class="form-group" style="margin-top: 6px;">
+            <label class="form-label">Prerequisite Task Dependencies (Must be completed first)</label>
+            <div id="wf-edit-dependencies-list" class="dependencies-checkbox-group"></div>
+            <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">
+              🛡️ Circular dependencies are automatically prevented.
+            </span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost modal-close-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="save-wf-task-submit">Apply Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL: Add / Edit Milestone
+       ====================================================================== -->
+  <div class="modal-overlay" id="wf-milestone-modal">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 id="wf-milestone-modal-title">Workflow Milestone</h3>
+        <button class="modal-close-btn btn-icon-only" aria-label="Close Modal">✕</button>
+      </div>
+      <form id="wf-milestone-form">
+        <input type="hidden" id="wf-edit-milestone-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="wf-milestone-title">Milestone Title *</label>
+            <input type="text" class="form-control" id="wf-milestone-title" required placeholder="e.g. Venue Secured &amp; Budget Allocated">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wf-milestone-desc">Expected Outcome</label>
+            <textarea class="form-control" id="wf-milestone-desc" rows="2" placeholder="e.g. Facility clearance approved with institutional admin sign-off"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wf-milestone-due">Target Due Date</label>
+            <input type="date" class="form-control" id="wf-milestone-due">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost modal-close-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="save-wf-milestone-submit">Save Milestone</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL: Confirmation Dialog
+       ====================================================================== -->
+  <div class="modal-overlay" id="wf-confirm-modal">
+    <div class="modal-card" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 id="wf-confirm-title">Confirm Action</h3>
+        <button class="modal-close-btn btn-icon-only" aria-label="Close Modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="wf-confirm-message" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;"></p>
+        <div id="wf-confirm-extra-options" style="margin-top: 12px; display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost modal-close-btn" id="wf-confirm-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="wf-confirm-action-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL: Edit Workflow Details & Overview
+       ====================================================================== -->
+  <div class="modal-overlay" id="wf-rename-modal">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 id="wf-rename-modal-title">Edit Workflow Details</h3>
+        <button class="modal-close-btn btn-icon-only" aria-label="Close Modal">✕</button>
+      </div>
+      <form id="wf-rename-form">
+        <input type="hidden" id="wf-rename-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="wf-rename-title-input">Workflow Title *</label>
+            <input type="text" class="form-control" id="wf-rename-title-input" required placeholder="Enter workflow title...">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="wf-edit-workflow-summary">Summary &amp; Objective</label>
+            <textarea class="form-control" id="wf-edit-workflow-summary" rows="3" placeholder="Core objective and high-level scope..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="wf-edit-workflow-deadline">Overall Deadline</label>
+              <input type="date" class="form-control" id="wf-edit-workflow-deadline">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wf-edit-workflow-priority">Baseline Priority</label>
+              <select class="form-control" id="wf-edit-workflow-priority">
+                <option value="urgent">Urgent</option>
+                <option value="high" selected>High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="wf-edit-workflow-team">Team / Organizers</label>
+              <input type="text" class="form-control" id="wf-edit-workflow-team" placeholder="e.g. 4 Organizers">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wf-edit-workflow-budget">Budget / Scope</label>
+              <input type="text" class="form-control" id="wf-edit-workflow-budget" placeholder="e.g. Limited budget">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost modal-close-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="save-rename-submit">Save Workflow Details</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Anchor -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Logic Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/ai-copilot.js"></script>
+  <script src="scripts/timer.js"></script>
+  <script src="scripts/analytics.js"></script>
+  <script src="scripts/app.js"></script>
+</body>
+</html>

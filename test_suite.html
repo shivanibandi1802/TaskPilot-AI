@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TaskPilot Automated Workflow Test Suite</title>
+</head>
+<body style="background:#080b11; color:#fff; font-family:sans-serif; padding:20px;">
+  <h2>Running TaskPilot AI Workflow Test Suite...</h2>
+  <div id="test-log" style="font-family:monospace; white-space:pre-wrap; background:#141b2d; padding:16px; border-radius:8px;"></div>
+
+  <!-- Load App scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/ai-copilot.js"></script>
+  <script src="scripts/timer.js"></script>
+  <script src="scripts/analytics.js"></script>
+
+  <script>
+    const logEl = document.getElementById('test-log');
+    const logs = [];
+    function log(msg) {
+      console.log(msg);
+      logs.push(msg);
+      logEl.textContent = logs.join('\n');
+    }
+
+    window.runTests = async function() {
+      try {
+        log('Test 1: StorageManager initialized');
+        if (!window.storageManager) throw new Error('storageManager missing');
+        log(' PASS: storageManager is available');
+
+        log('Test 2: AICopilot initialized');
+        if (!window.aiCopilot) throw new Error('aiCopilot missing');
+        log(' PASS: aiCopilot is available');
+
+        log('Test 3: Generating deterministic college hackathon plan...');
+        const prompt = "Organize a college hackathon for 100 participants in 10 days. Handle venue booking, registrations, sponsorships, marketing, mentors, equipment, event-day operations, and post-event feedback. We have four organizers and a limited budget.";
+        const plan = await window.aiCopilot.generateOperationsWorkflow(prompt, {
+          name: 'Campus Hackathon 2026',
+          deadline: '2026-10-20',
+          priority: 'high',
+          teamSize: '4 Organizers',
+          budget: '$1,500',
+          detailLevel: 'detailed',
+          projectId: 'proj-academic'
+        });
+
+        if (!plan || !plan.title || !plan.tasks || plan.tasks.length === 0) {
+          throw new Error('Plan generation returned empty or invalid structure');
+        }
+        log(` PASS: Generated plan "${plan.title}" with ${plan.tasks.length} tasks, ${plan.milestones.length} milestones`);
+
+        log('Test 4: StorageManager active draft persistence...');
+        window.storageManager.saveActiveWorkflowDraft(plan);
+        const retrieved = window.storageManager.getActiveWorkflowDraft();
+        if (!retrieved || retrieved.title !== plan.title || retrieved.tasks.length !== plan.tasks.length) {
+          throw new Error('Draft persistence mismatch');
+        }
+        log(' PASS: Active workflow draft successfully saved and retrieved from localStorage');
+
+        log('Test 5: StorageManager addWorkflow and history count...');
+        window.storageManager.addWorkflow(plan);
+        const wfs = window.storageManager.getWorkflows();
+        const found = wfs.find(w => w.id === plan.id);
+        if (!found) throw new Error('Saved workflow not found in getWorkflows()');
+        log(` PASS: Workflow saved to history. Total saved workflows: ${wfs.length}`);
+
+        log('Test 6: StorageManager enrichWorkflowWithTaskStats...');
+        const enriched = window.storageManager.enrichWorkflowWithTaskStats(found);
+        if (typeof enriched.completionPercentage !== 'number') {
+          throw new Error('enriched workflow missing completionPercentage');
+        }
+        log(` PASS: Enriched workflow has totalTasks=${enriched.totalTasks}, completedTasks=${enriched.completedTasks}, progress=${enriched.completionPercentage}%`);
+
+        log('Test 7: Task status toggle and recalculation...');
+        const testTask = plan.tasks[0];
+        testTask.status = 'done';
+        testTask.completed = true;
+        const enrichedAfterDone = window.storageManager.enrichWorkflowWithTaskStats(plan);
+        if (enrichedAfterDone.completedTasks !== 1) {
+          throw new Error('Enriched completed task count should be 1');
+        }
+        log(` PASS: Progress after 1 task completed = ${enrichedAfterDone.completionPercentage}% (${enrichedAfterDone.completedTasks}/${enrichedAfterDone.totalTasks})`);
+
+        log('Test 8: Clear active draft...');
+        window.storageManager.clearActiveWorkflowDraft();
+        const cleared = window.storageManager.getActiveWorkflowDraft();
+        if (cleared !== null) throw new Error('Active draft was not cleared');
+        log(' PASS: clearActiveWorkflowDraft() worked cleanly');
+
+        log('\n🎉 ALL WORKFLOW ENGINE & PERSISTENCE TESTS PASSED SUCCESSFULLY!');
+        window.__TESTS_PASSED__ = true;
+      } catch (err) {
+        log(`\n❌ TEST FAILURE: ${err.message}\n${err.stack}`);
+        window.__TESTS_PASSED__ = false;
+      }
+    };
+
+    window.addEventListener('load', () => {
+      window.runTests();
+    });
+  </script>
+</body>
+</html>
